@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react'
+import React, {useCallback, useState, useEffect} from 'react'
 import {useDropzone} from 'react-dropzone'
 import Papa from 'papaparse'
 import { UploadBox } from '../components/UploadBox'
@@ -6,26 +6,35 @@ import { DisplayTable } from '../components/DisplayTable'
 import { dateFormatter } from '../businessLogic/dateFormatter'
 import { DateExporter } from '../components/DateExporter'
 import styled from 'styled-components';
+import { LoadingIcon } from '../components/LoadingIcon'
 
 export const ConverterPage = () => { 
 
     const [csvData,setCsvData] = useState()
+    const [isLoading,setIsLoading] = useState(false)
 
-    const callFormatter = () => {
-      setCsvData(dateFormatter(csvData))
+    function callFormatter() {
+       setCsvData(dateFormatter(csvData))
     }
 
     const onDrop = useCallback(acceptedFiles => {
+      setCsvData([]) 
         Papa.parse(acceptedFiles[0], {
-            header: false,
-            skipEmptyLines: true,
-            complete: function (results) {
-              setCsvData(results.data)
-            },
-          });
+          header: false,
+          skipEmptyLines: true,
+          complete: function (results) {
+            setCsvData(results.data)        
+          },
+        });
         }, [])
 
     const {getRootProps} = useDropzone({onDrop})
+
+    useEffect (()=>{
+      if(csvData){
+        csvData.length === 0 ? setIsLoading(true) : setIsLoading(false)
+      } 
+    },[csvData])
 
     return(
         <PageContainer>
@@ -35,18 +44,19 @@ export const ConverterPage = () => {
           <DropZoneContainer>
             <UploadBox getRootProps={getRootProps}/>
           </DropZoneContainer>
-            {csvData ? 
-            <>
-            <ButtonContainer>
-              <ConvertButton onClick={callFormatter}>Convert</ConvertButton>
-              <DateExporter fileName={"test1.csv"} data={csvData}/>
-            </ButtonContainer>
-            <TableContainer>
-              <DisplayTable csvData={csvData}/>
-            </TableContainer>
-            </>
-              : 
-            <></>}
+          {csvData ? 
+              <>
+                <ButtonContainer>
+                  <ConvertButton onClick={callFormatter}>Convert</ConvertButton>
+                  <DateExporter fileName={"test1.csv"} data={csvData}/>
+                </ButtonContainer>
+                <TableContainer>
+                  {isLoading ? <LoadingIcon/> : <DisplayTable csvData={csvData}/> }
+                </TableContainer>
+              </>
+              :
+              <></>
+            }
         </PageContainer>
     )
 }

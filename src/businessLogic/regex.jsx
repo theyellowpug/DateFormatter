@@ -1,3 +1,5 @@
-export const slashDateFormat = /\d{1,2}\/\d{1,2}\/\d{1,4}/
+export const slashSeparatedNumberDateFormat = /\d{1,2}\/\d{1,2}\/\d{1,4}/
 
-export const stringDateFormat = /\d*[.]\D*[.]\d*/
+export const dotSeparatedStringDateFormat = /\d*[.]\D*[.]\d*/
+
+export const slashSeparatedStringDateFormat = /\d*\/\D*\/\d*/
